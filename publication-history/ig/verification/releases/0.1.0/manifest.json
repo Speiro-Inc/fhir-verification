@@ -1,0 +1,18 @@
+{
+  "packageId": "net.speirotech.fhir.verification",
+  "version": "0.1.0",
+  "files": {
+    "ig/verification/releases/0.1.0/ImplementationGuide-speiro-verification.json": "1dbc5280fc97eedb3f116fadcdaf69d43c5f1c38c3264801afb90b2576bcc651",
+    "ig/verification/releases/0.1.0/Parameters-synthetic-scaffold-notice.change.history.html": "b20c5baf476ab0b0ec21e4ff2bb6d3613830b311b34375b1243ce6344da09bad",
+    "ig/verification/releases/0.1.0/Parameters-synthetic-scaffold-notice.html": "b20c5baf476ab0b0ec21e4ff2bb6d3613830b311b34375b1243ce6344da09bad",
+    "ig/verification/releases/0.1.0/Parameters-synthetic-scaffold-notice.json": "0c31ff587e3ef11741dba045469cfe7585e2da03da6c337a6c04cf309fb482cf",
+    "ig/verification/releases/0.1.0/Parameters-synthetic-scaffold-notice.json.html": "b20c5baf476ab0b0ec21e4ff2bb6d3613830b311b34375b1243ce6344da09bad",
+    "ig/verification/releases/0.1.0/Parameters-synthetic-scaffold-notice.ttl.html": "c713fcf69a2e97ea1a529bb46256243f5f3d74ab052b8f1234cb68963cb949b5",
+    "ig/verification/releases/0.1.0/Parameters-synthetic-scaffold-notice.xml.html": "d6e5b89ce8eb506febdaa581f470f98bda52497c8a068e82e9eac20de4ed0c17",
+    "ig/verification/releases/0.1.0/artifacts.html": "c460134422b580fd9371211206b7d70b141c200d7c12929d3640abc7f10bf8aa",
+    "ig/verification/releases/0.1.0/index.html": "4775001582c464633a7ec48f18f606d20cb1edd98a8fecc480268940b6b164f0",
+    "ig/verification/releases/0.1.0/package.tgz": "0502e5927b1542d320b50b66107f50c3cf1fa840aaf5c4dcdcf73fc8ab39083a",
+    "ig/verification/releases/0.1.0/searchform.html": "c460134422b580fd9371211206b7d70b141c200d7c12929d3640abc7f10bf8aa",
+    "ig/verification/releases/0.1.0/toc.html": "c460134422b580fd9371211206b7d70b141c200d7c12929d3640abc7f10bf8aa"
+  }
+}

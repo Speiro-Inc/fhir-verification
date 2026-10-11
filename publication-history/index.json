@@ -1,4 +1,9 @@
 {
   "packageId": "net.speirotech.fhir.verification",
-  "releases": []
+  "releases": [
+    {
+      "version": "0.1.0",
+      "manifestSha256": "eeeab191e4bee3f2e6ac4f6a6bfdb5224c1965b610cdcfe930c06a57f9d3a29f"
+    }
+  ]
 }
