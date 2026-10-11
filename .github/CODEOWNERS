@@ -1,0 +1,9 @@
+# Both maintainers confirmed as repository admins via read-only API inspection.
+# Enforcement requires code-owner review in ruleset 24856755 after merge.
+/.github/workflows/ @beltt-gabriela @23fanuz
+/scripts/ @beltt-gabriela @23fanuz
+/tests/ @beltt-gabriela @23fanuz
+/HISTORY_SAFEGUARD.md @beltt-gabriela @23fanuz
+/.github/CODEOWNERS @beltt-gabriela @23fanuz
+/publication-history/ @beltt-gabriela @23fanuz
+/.gitattributes @beltt-gabriela @23fanuz
