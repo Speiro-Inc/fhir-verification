@@ -1,0 +1,32 @@
+name: Publication history validation
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, edited]
+permissions:
+  contents: read
+jobs:
+  history:
+    name: Publication history append-only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4; same pin as publication workflows
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch exact PR base
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          [[ "$BASE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git fetch --no-tags --no-auto-maintenance origin "$BASE_SHA"
+          test "$(git rev-parse FETCH_HEAD)" = "$BASE_SHA"
+      - name: Test history safeguard
+        run: python3 -B -m unittest discover -s tests -v
+      - name: Validate proposed history against actual PR base
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python3 -B scripts/history_guard.py --base "$BASE_SHA" --head "$HEAD_SHA"
