@@ -1,0 +1,10 @@
+{
+  "resourceType": "Parameters",
+  "id": "synthetic-scaffold-notice",
+  "parameter": [
+    {
+      "name": "notice",
+      "valueString": "Synthetic scaffold validation only; no patient or clinical data."
+    }
+  ]
+}

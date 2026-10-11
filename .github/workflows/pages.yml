@@ -1,0 +1,178 @@
+name: Publish reviewed Speiro FHIR release
+on:
+  workflow_dispatch:
+    inputs:
+      source_commit:
+        description: Reviewed 40-character ABA_Wearable source commit
+        required: true
+        type: string
+      history_commit:
+        description: Reviewed 40-character hosting commit retaining complete publication-history
+        required: true
+        type: string
+      selected_version:
+        description: Exact reviewed version already retained in the history index
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: speiro-fhir-pages
+  cancel-in-progress: false
+jobs:
+  assemble:
+    if: github.repository == 'Speiro-Inc/fhir-verification' && github.event_name == 'workflow_dispatch' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: fhir-source-read
+    steps:
+      - name: Validate immutable references
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          HISTORY_COMMIT: ${{ inputs.history_commit }}
+        run: |
+          [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$HISTORY_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+      - name: Require current default-branch history HEAD
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          HISTORY_COMMIT: ${{ inputs.history_commit }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'FRESHNESS'
+          // Embedded verbatim in both inactive templates; tests prevent gate drift.
+          // This gate uses only the hosting repository's read-only GITHUB_TOKEN.
+          const { GITHUB_REPOSITORY, HISTORY_COMMIT, GH_TOKEN } = process.env;
+          if (GITHUB_REPOSITORY !== "Speiro-Inc/fhir-verification")
+            throw new Error("Unexpected hosting repository");
+          if (!/^[0-9a-f]{40}$/.test(HISTORY_COMMIT ?? "") || !GH_TOKEN)
+            throw new Error("Missing history commit or hosting read token");
+          async function get(endpoint) {
+            const response = await fetch(
+              "https://api.github.com/repos/" + GITHUB_REPOSITORY + endpoint,
+              {
+                headers: {
+                  Authorization: "Bearer " + GH_TOKEN,
+                  Accept: "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+                },
+                redirect: "error",
+                signal: AbortSignal.timeout(30000),
+              },
+            );
+            if (!response.ok)
+              throw new Error("History freshness API failed: " + response.status);
+            return response.json();
+          }
+          const metadata = await get("");
+          if (typeof metadata.default_branch !== "string" || !metadata.default_branch)
+            throw new Error("Missing actual default branch");
+          const ref = await get(
+            "/git/ref/heads/" + encodeURIComponent(metadata.default_branch),
+          );
+          if (
+            ref.ref !== "refs/heads/" + metadata.default_branch ||
+            ref.object?.type !== "commit" ||
+            ref.object.sha !== HISTORY_COMMIT
+          )
+            throw new Error(
+              "Stale history: default-branch HEAD differs; obtain a new reviewed dispatch",
+            );
+          console.log(
+            "Fresh history: " + metadata.default_branch + " @ " + HISTORY_COMMIT,
+          );
+          FRESHNESS
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: Speiro-Inc/ABA_Wearable
+          ref: ${{ inputs.source_commit }}
+          token: ${{ secrets.FHIR_SOURCE_CONTENTS_TOKEN }}
+          path: source
+          sparse-checkout: fhir/verification
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.history_commit }}
+          path: history
+          persist-credentials: false
+      - name: Verify checked-out commits
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          HISTORY_COMMIT: ${{ inputs.history_commit }}
+        run: |
+          test "$(git -C source rev-parse HEAD)" = "$SOURCE_COMMIT"
+          test "$(git -C history rev-parse HEAD)" = "$HISTORY_COMMIT"
+          printf 'Source commit: %s\nHistory commit: %s\n' "$SOURCE_COMMIT" "$HISTORY_COMMIT" >> "$GITHUB_STEP_SUMMARY"
+      - name: Assemble retained release without rebuilding
+        env:
+          SELECTED_VERSION: ${{ inputs.selected_version }}
+        run: |
+          set -o pipefail
+          node source/fhir/verification/scripts/history.mjs history/publication-history site "$SELECTED_VERSION" | tee selection.json
+          cat selection.json >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: site
+  deploy:
+    needs: assemble
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Require current default-branch history HEAD
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          HISTORY_COMMIT: ${{ inputs.history_commit }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'FRESHNESS'
+          // Embedded verbatim in both inactive templates; tests prevent gate drift.
+          // This gate uses only the hosting repository's read-only GITHUB_TOKEN.
+          const { GITHUB_REPOSITORY, HISTORY_COMMIT, GH_TOKEN } = process.env;
+          if (GITHUB_REPOSITORY !== "Speiro-Inc/fhir-verification")
+            throw new Error("Unexpected hosting repository");
+          if (!/^[0-9a-f]{40}$/.test(HISTORY_COMMIT ?? "") || !GH_TOKEN)
+            throw new Error("Missing history commit or hosting read token");
+          async function get(endpoint) {
+            const response = await fetch(
+              "https://api.github.com/repos/" + GITHUB_REPOSITORY + endpoint,
+              {
+                headers: {
+                  Authorization: "Bearer " + GH_TOKEN,
+                  Accept: "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+                },
+                redirect: "error",
+                signal: AbortSignal.timeout(30000),
+              },
+            );
+            if (!response.ok)
+              throw new Error("History freshness API failed: " + response.status);
+            return response.json();
+          }
+          const metadata = await get("");
+          if (typeof metadata.default_branch !== "string" || !metadata.default_branch)
+            throw new Error("Missing actual default branch");
+          const ref = await get(
+            "/git/ref/heads/" + encodeURIComponent(metadata.default_branch),
+          );
+          if (
+            ref.ref !== "refs/heads/" + metadata.default_branch ||
+            ref.object?.type !== "commit" ||
+            ref.object.sha !== HISTORY_COMMIT
+          )
+            throw new Error(
+              "Stale history: default-branch HEAD differs; obtain a new reviewed dispatch",
+            );
+          console.log(
+            "Fresh history: " + metadata.default_branch + " @ " + HISTORY_COMMIT,
+          );
+          FRESHNESS
+      - name: Deploy after owner environment approval
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

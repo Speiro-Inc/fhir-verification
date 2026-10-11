@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Synthetic scaffold notice</title></head><body><main><h1>Synthetic scaffold notice</h1><p>Experimental, nonclinical scaffold.</p><pre>@prefix fhir: &lt;http://hl7.org/fhir/&gt; .
+@prefix owl: &lt;http://www.w3.org/2002/07/owl#&gt; .
+@prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt; .
+@prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt; .
+
+# - resource -------------------------------------------------------------------
+
+&lt;https://fhir.speirotech.net/Parameters/synthetic-scaffold-notice&gt; a fhir:Parameters ;
+  fhir:nodeRole fhir:treeRoot ;
+  fhir:Resource.id [ fhir:value &quot;synthetic-scaffold-notice&quot;] ;
+  fhir:Parameters.parameter [
+     fhir:index 0 ;
+     fhir:Parameters.parameter.name [ fhir:value &quot;notice&quot; ] ;
+     fhir:Parameters.parameter.valueString [ fhir:value &quot;Synthetic scaffold validation only; no patient or clinical data.&quot; ]
+  ] .
+
+# - ontology header ------------------------------------------------------------
+
+&lt;https://fhir.speirotech.net/Parameters/synthetic-scaffold-notice.ttl&gt; a owl:Ontology ;
+  owl:imports fhir:fhir.ttl .
+
+# -------------------------------------------------------------------------------------
+
+</pre><p><a href="index.html">Guide</a> · <a href="Parameters-synthetic-scaffold-notice.json">Synthetic notice JSON</a> · <a href="ImplementationGuide-speiro-verification.json">ImplementationGuide JSON</a> · <a href="package.tgz">Package</a></p></main></body></html>
